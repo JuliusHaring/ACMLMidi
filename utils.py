@@ -174,7 +174,7 @@ def generate(model, seeds, window_size, length, num_to_gen, instrument_name):
 # output of keras model.predict.
 def _network_output_to_midi(windows, 
                            instrument_name='Acoustic Grand Piano', 
-                           allow_represses=False):
+                           allow_represses=True):
 
     # Create a PrettyMIDI object
     midi = pretty_midi.PrettyMIDI()

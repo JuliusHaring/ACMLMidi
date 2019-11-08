@@ -66,7 +66,7 @@ def get_model(args, experiment_dir=None):
     
     if not experiment_dir:
         model = Sequential()
-        model.add(LSTM(64, input_shape=(args.window_size, OUTPUT_SIZE), return_sequences = False, recurrent_dropout=0.7, dropout=0.6, kernel_regularizer=regularizer))
+        model.add(LSTM(64, input_shape=(args.window_size, OUTPUT_SIZE), return_sequences = False, recurrent_dropout=0.7, dropout=0.6, kernel_regularizer=regularizer, recurrent_regularizer=regularizer))
         model.add(Dense(OUTPUT_SIZE))
         model.add(Activation('softmax'))
     else:
