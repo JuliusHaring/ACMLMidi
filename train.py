@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os, argparse, time
 import utils
+from keras.regularizers import  l2
 from keras.models import Sequential
 from keras.layers import Dense, Activation, Dropout
 from keras.layers import LSTM
@@ -60,64 +61,19 @@ def parse_args():
 def get_model(args, experiment_dir=None):
     
     epoch = 0
+
+    regularizer = l2(0.01)
     
     if not experiment_dir:
         model = Sequential()
-        for layer_index in range(args.num_layers):
-            kwargs = dict() 
-            kwargs['units'] = args.rnn_size
-            # if this is the first layer
-            if layer_index == 0:
-                kwargs['input_shape'] = (args.window_size, OUTPUT_SIZE)
-                if args.num_layers == 1:
-                    kwargs['return_sequences'] = False
-                else:
-                    kwargs['return_sequences'] = True
-                model.add(LSTM(**kwargs))
-            else:
-                # if this is a middle layer
-                if not layer_index == args.num_layers - 1:
-                    kwargs['return_sequences'] = True
-                    model.add(LSTM(**kwargs))
-                else: # this is the last layer
-                    kwargs['return_sequences'] = False
-                    model.add(LSTM(**kwargs))
-            model.add(Dropout(args.dropout))
+        model.add(LSTM(129, input_shape=(args.window_size, OUTPUT_SIZE), return_sequences = True, recurrent_dropout=0.4, kernel_regularizer=regularizer))
+        model.add(LSTM(60, recurrent_dropout=0.4, kernel_regularizer=regularizer))
         model.add(Dense(OUTPUT_SIZE))
         model.add(Activation('softmax'))
     else:
         model, epoch = utils.load_model_from_checkpoint(experiment_dir)
 
-    # these cli args aren't specified if get_model() is being
-    # being called from sample.py
-    if 'grad_clip' in args and 'optimizer' in args:
-        kwargs = { 'clipvalue': args.grad_clip }
-
-        if args.learning_rate:
-            kwargs['lr'] = args.learning_rate
-
-        # select the optimizers
-        if args.optimizer == 'sgd':
-            optimizer = SGD(**kwargs)
-        elif args.optimizer == 'rmsprop':
-            optimizer = RMSprop(**kwargs)
-        elif args.optimizer == 'adagrad':
-            optimizer = Adagrad(**kwargs)
-        elif args.optimizer == 'adadelta':
-            optimizer = Adadelta(**kwargs)
-        elif args.optimizer == 'adam':
-            optimizer = Adam(**kwargs)
-        elif args.optimizer == 'adamax':
-            optimizer = Adamax(**kwargs)
-        elif args.optimizer == 'nadam':
-            optimizer = Nadam(**kwargs)
-        else:
-            utils.log(
-                'Error: {} is not a supported optimizer. Exiting.'.format(args.optimizer),
-                True)
-            exit(1)
-    else: # so instead lets use a default (no training occurs anyway)
-        optimizer = Adam()
+    optimizer = Nadam(clipvalue = 0.5)
 
     model.compile(loss='categorical_crossentropy', 
                   optimizer=optimizer,
