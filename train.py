@@ -62,12 +62,11 @@ def get_model(args, experiment_dir=None):
     
     epoch = 0
 
-    regularizer = l2(0.01)
+    regularizer = l2(0.05)
     
     if not experiment_dir:
         model = Sequential()
-        model.add(LSTM(OUTPUT_SIZE, input_shape=(args.window_size, OUTPUT_SIZE), return_sequences = False, recurrent_dropout=0.4, kernel_regularizer=regularizer))
-        model.add(Dense(200, kernel_regularizer=regularizer))
+        model.add(LSTM(64, input_shape=(args.window_size, OUTPUT_SIZE), return_sequences = False, recurrent_dropout=0.7, dropout=0.6, kernel_regularizer=regularizer))
         model.add(Dense(OUTPUT_SIZE))
         model.add(Activation('softmax'))
     else:
