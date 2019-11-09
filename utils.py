@@ -131,7 +131,7 @@ def load_model_from_checkpoint(model_dir):
                             key=os.path.getctime)
 
     if newest_checkpoint: 
-       epoch = int(newest_checkpoint[-22:-19])
+       epoch = int(newest_checkpoint[-8:-5])
        model.load_weights(newest_checkpoint)
 
     return model, epoch
@@ -173,7 +173,7 @@ def generate(model, seeds, window_size, length, num_to_gen, instrument_name):
 # output of keras model.predict.
 def _network_output_to_midi(windows, 
                            instrument_name='Acoustic Grand Piano', 
-                           allow_represses=False):
+                           allow_represses=True):
 
     # Create a PrettyMIDI object
     midi = pretty_midi.PrettyMIDI()

@@ -87,7 +87,7 @@ def get_callbacks(experiment_dir, checkpoint_monitor='val_acc'):
     # save model checkpoints
     filepath = os.path.join(experiment_dir, 
                             'checkpoints', 
-                            'checkpoint-epoch_{epoch:03d}-val_acc_{val_acc:.3f}.hdf5')
+                            'checkpoint-epoch_{epoch:03d}.hdf5')
 
     callbacks.append(ModelCheckpoint(filepath, 
                                      monitor=checkpoint_monitor, 
