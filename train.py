@@ -75,7 +75,7 @@ def get_model(args, experiment_dir=None):
     else:
         model, epoch = utils.load_model_from_checkpoint(experiment_dir)
 
-    optimizer = Nadam(clipvalue = 0.5)
+    optimizer = Nadam(clipvalue = 0.5, learning_rate=0.0005)
 
     model.compile(loss='categorical_crossentropy', 
                   optimizer=optimizer,
