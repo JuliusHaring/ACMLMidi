@@ -130,9 +130,16 @@ def load_model_from_checkpoint(model_dir):
     	                    '/checkpoints/*.hdf5'), 
                             key=os.path.getctime)
 
+<<<<<<< HEAD
     if newest_checkpoint: 
        epoch = int(newest_checkpoint[-8:-5])
        model.load_weights(newest_checkpoint)
+=======
+    if newest_checkpoint:
+        epoch_str = newest_checkpoint[-8:-5]
+        epoch = int(epoch_str)
+        model.load_weights(newest_checkpoint)
+>>>>>>> user
 
     return model, epoch
 

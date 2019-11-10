@@ -2,9 +2,9 @@
 import os, argparse, time
 import utils
 from keras.regularizers import  l2
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.layers import Dense, Activation, Dropout
-from keras.layers import LSTM
+from keras.layers import LSTM, concatenate, Input, Flatten,Add
 from keras.callbacks import ModelCheckpoint, ReduceLROnPlateau, TensorBoard
 from keras.optimizers import SGD, RMSprop, Adagrad, Adadelta, Adam, Adamax, Nadam
 
@@ -62,18 +62,22 @@ def get_model(args, experiment_dir=None):
     
     epoch = 0
 
-    regularizer = l2(0.01)
-    
+    regularizer = l2(0.05)
+    do = 0.3
+
     if not experiment_dir:
-        model = Sequential()
-        model.add(LSTM(129, input_shape=(args.window_size, OUTPUT_SIZE), return_sequences = True, recurrent_dropout=0.4, kernel_regularizer=regularizer))
-        model.add(LSTM(60, recurrent_dropout=0.4, kernel_regularizer=regularizer))
-        model.add(Dense(OUTPUT_SIZE))
-        model.add(Activation('softmax'))
+        input = Input(shape=(args.window_size, OUTPUT_SIZE))
+        lstm1 = LSTM(60, recurrent_dropout=do, dropout=do, return_sequences = True)(input)
+        lstm2 = LSTM(60, recurrent_dropout=do, dropout=do, return_sequences=True)(lstm1)
+        lstm3 = LSTM(60, recurrent_dropout=do, dropout=do, return_sequences=True)(lstm2)
+        conc = Add()([lstm1, lstm3])
+        flat = Flatten()(conc)
+        out = Dense(OUTPUT_SIZE, activation="softmax")(flat)
+        model = Model(inputs=input, outputs = out)
     else:
         model, epoch = utils.load_model_from_checkpoint(experiment_dir)
 
-    optimizer = Nadam(clipvalue = 0.5)
+    optimizer = Nadam(clipvalue = 0.5, learning_rate=0.0005)
 
     model.compile(loss='categorical_crossentropy', 
                   optimizer=optimizer,
